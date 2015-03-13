@@ -1,0 +1,167 @@
+import nebula.plugin.info.InfoBrokerPlugin
+
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:1.2.5'
+        classpath 'com.netflix.nebula:gradle-info-plugin:1.12.7'
+        classpath 'net.saliman:gradle-cobertura-plugin:2.2.4'
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}
+
+allprojects {
+    group = 'com.mrwanny.example'
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'war'
+apply plugin: 'tomcat'
+apply plugin: 'info'
+apply plugin: 'cobertura'
+
+def javaVersion = '1.7'
+def tomcatVersion = '7.0.54'
+def springVersion = '4.0.5.RELEASE'
+def componentsVersion = '1.0.1'
+sourceCompatibility = javaVersion
+
+def tomcatDebugPort = 5005
+def tomcatHttpPort = 8080
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+}
+
+class GenerateManifest extends DefaultTask {
+    Map<String, String> attributes = [:]
+
+    @OutputFile
+    File manifestDestination = new File(project.sourceSets.main.output.resourcesDir.path + File.separator + "META-INF", "MANIFEST.MF")
+
+    @TaskAction
+    def generateManifest() {
+        project.tasks.withType(Jar) { Jar jarTask ->
+            jarTask.manifest.attributes(this.attributes)
+            jarTask.manifest.writeTo(manifestDestination)
+        }
+    }
+}
+
+task generateManifest(type: GenerateManifest, dependsOn: writeManifestProperties) {
+    project.afterEvaluate {
+        project.plugins.withType(InfoBrokerPlugin) { manifestPlugin ->
+            attributes += manifestPlugin.buildManifest()
+            inputs.properties(manifestPlugin.buildNonChangingManifest())
+        }
+    }
+}
+
+processResources.dependsOn(generateManifest)
+
+dependencies {
+
+    compile "org.springframework:spring-context:${springVersion}"
+    compile "org.springframework:spring-webmvc:${springVersion}"
+    
+    //compile "com.mangofactory:swagger-springmvc:1.0.1-SNAPSHOT"
+    //compile "com.mangofactory:swagger-springmvc:2.0.0-SNAPSHOT"
+    //compile "com.mangofactory.documentation:2.0.0-SNAPSHOT"
+    compile "com.mangofactory.documentation:mangodocs-core:2.0.0-SNAPSHOT"
+    compile "com.mangofactory.documentation:mangodocs-spi:2.0.0-SNAPSHOT"
+    compile "com.mangofactory.documentation:mangodocs-schema:2.0.0-SNAPSHOT"
+    compile "com.mangofactory.documentation:mangodocs-spring-web:2.0.0-SNAPSHOT"
+    compile "com.mangofactory.documentation:mangodocs-swagger-common:2.0.0-SNAPSHOT"
+    compile "com.mangofactory.documentation:mangodocs-swagger2:2.0.0-SNAPSHOT"
+
+
+    //compile "org.ajar:swagger-spring-mvc-ui:0.4"
+
+    compile "com.google.guava:guava:18.0"
+    compile "org.apache.logging.log4j:log4j-to-slf4j:2.1"
+
+    compile "org.slf4j:log4j-over-slf4j:1.7.8"
+    compile "org.slf4j:jcl-over-slf4j:1.7.8"
+    compile "org.slf4j:slf4j-ext:1.7.8"
+
+    compile "joda-time:joda-time:2.2"
+
+    compile "ch.qos.logback:logback-core:1.1.2"
+    compile "ch.qos.logback:logback-classic:1.1.2"
+
+    compile "io.dropwizard.metrics:metrics-core:3.1.0"
+    compile "io.dropwizard.metrics:metrics-servlets:3.1.0"
+
+    testCompile "org.hamcrest:hamcrest-all:1.3"
+    testCompile "junit:junit:4.11"
+    testCompile "org.easymock:easymock:3.2"
+    testCompile "org.mockito:mockito-all:1.10.8"
+    testCompile "org.springframework:spring-test:${springVersion}"
+
+    providedCompile "javax.servlet:javax.servlet-api:3.0.1"
+
+    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+    tomcat "org.apache.tomcat.embed:tomcat-embed-logging-log4j:${tomcatVersion}"
+    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
+        exclude group: "org.eclipse.jdt.core.compiler", module: "ecj"
+    }
+}
+
+tomcat {
+    httpPort = tomcatHttpPort
+}
+
+// The Tomcat Plugin runs in the JVM of the gradle process instead of forking a new JVM which makes debugging difficult,
+// you can attach a debugger but are unable to hit break points in your application code.  This wrapper task launches
+// the tomcat "tomcatRun" task in it's own JVM allowing you to set a debug listener and hit break points.
+task tomcatDebug << {
+
+    org.gradle.tooling.ProjectConnection conn = org.gradle.tooling.GradleConnector.newConnector()
+            .forProjectDirectory(new File('.'))
+            .connect();
+
+    try {
+
+        org.gradle.tooling.model.build.BuildEnvironment env = conn.getModel(org.gradle.tooling.model.build.BuildEnvironment.class)
+        org.gradle.tooling.BuildLauncher build = conn.newBuild();
+
+        build.forTasks('tomcatRunWar')
+        build.setJvmArguments("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=${tomcatDebugPort}", *env.java.jvmArguments)
+        build.run()
+
+    } finally {
+        conn.close();
+    }
+}
+
+war.archiveName = rootProject.name + ".war"
+
+idea {
+    project {
+        jdkName = javaVersion
+        languageLevel = javaVersion
+    }
+
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+cobertura {
+    coverageIgnoreTrivial = true
+    coverageFormats = ['html', 'xml']
+}
+
