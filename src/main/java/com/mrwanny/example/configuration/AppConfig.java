@@ -7,7 +7,7 @@ import java.util.List;
 //import static org.ajar.swaggermvcui.SwaggerSpringMvcUi.WEB_JAR_VIEW_RESOLVER_PREFIX;
 //import static org.ajar.swaggermvcui.SwaggerSpringMvcUi.WEB_JAR_VIEW_RESOLVER_SUFFIX;
 
-import com.mangofactory.documentation.swagger2.annotations.EnableSwagger2;
+import springdox.documentation.swagger2.annotations.EnableSwagger2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;

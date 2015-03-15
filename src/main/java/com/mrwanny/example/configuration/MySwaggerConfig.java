@@ -2,18 +2,18 @@ package com.mrwanny.example.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.mangofactory.documentation.service.ResourceGroup;
-import com.mangofactory.documentation.spi.service.ResourceGroupingStrategy;
+import springdox.documentation.service.ResourceGroup;
+import springdox.documentation.spi.service.ResourceGroupingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.mangofactory.documentation.swagger2.annotations.EnableSwagger2;
-import com.mangofactory.documentation.swagger2.configuration.Swagger2DocumentationConfiguration;
-import com.mangofactory.documentation.spring.web.plugins.DocumentationConfigurer;
+import springdox.documentation.swagger2.annotations.EnableSwagger2;
+import springdox.documentation.swagger2.configuration.Swagger2DocumentationConfiguration;
+import springdox.documentation.spring.web.plugins.DocumentationConfigurer;
 
-import com.mangofactory.documentation.spring.web.plugins.DocumentationConfigurer;
-import com.mangofactory.documentation.spi.DocumentationType;
+import springdox.documentation.spring.web.plugins.DocumentationConfigurer;
+import springdox.documentation.spi.DocumentationType;
 //import com.mangofactory.swagger.configuration.SpringSwaggerConfig;
 //import com.mangofactory.swagger.plugin.EnableSwagger;
 //import com.mangofactory.swagger.plugin.SwaggerSpringMvcPlugin;

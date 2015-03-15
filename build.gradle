@@ -5,6 +5,9 @@ buildscript {
         mavenLocal()
         jcenter()
         mavenCentral()
+        maven {
+            url 'http://auto-util2.concur.concurtech.org:8081/artifactory/repo/'
+        }
     }
     dependencies {
         classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:1.2.5'
@@ -79,13 +82,12 @@ dependencies {
     //compile "com.mangofactory:swagger-springmvc:1.0.1-SNAPSHOT"
     //compile "com.mangofactory:swagger-springmvc:2.0.0-SNAPSHOT"
     //compile "com.mangofactory.documentation:2.0.0-SNAPSHOT"
-    compile "com.mangofactory.documentation:mangodocs-core:2.0.0-SNAPSHOT"
-    compile "com.mangofactory.documentation:mangodocs-spi:2.0.0-SNAPSHOT"
-    compile "com.mangofactory.documentation:mangodocs-schema:2.0.0-SNAPSHOT"
-    compile "com.mangofactory.documentation:mangodocs-spring-web:2.0.0-SNAPSHOT"
-    compile "com.mangofactory.documentation:mangodocs-swagger-common:2.0.0-SNAPSHOT"
-    compile "com.mangofactory.documentation:mangodocs-swagger2:2.0.0-SNAPSHOT"
-
+    compile "springdox:springdox-core:2.0.1-SNAPSHOT"
+    compile "springdox:springdox-spi:2.0.1-SNAPSHOT"
+    compile "springdox:springdox-schema:2.0.1-SNAPSHOT"
+    compile "springdox:springdox-spring-web:2.0.1-SNAPSHOT"
+    compile "springdox:springdox-swagger-common:2.0.1-SNAPSHOT"
+    compile "springdox:springdox-swagger2:2.0.1-SNAPSHOT"
 
     //compile "org.ajar:swagger-spring-mvc-ui:0.4"
 
