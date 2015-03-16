@@ -14,9 +14,7 @@ import springdox.documentation.spring.web.plugins.DocumentationConfigurer;
 
 import springdox.documentation.spring.web.plugins.DocumentationConfigurer;
 import springdox.documentation.spi.DocumentationType;
-//import com.mangofactory.swagger.configuration.SpringSwaggerConfig;
-//import com.mangofactory.swagger.plugin.EnableSwagger;
-//import com.mangofactory.swagger.plugin.SwaggerSpringMvcPlugin;
+import springdox.documentation.service.ApiInfo;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -32,6 +30,13 @@ public class MySwaggerConfig {
    //private SpringSwaggerConfig springSwaggerConfig;
 
     private DocumentationConfigurer documentationConfigurer;
+
+
+   @Autowired
+   public void setDocumentationConfigurer(DocumentationConfigurer configurer){
+      this.documentationConfigurer = documentationConfigurer;
+   }
+
    /**
     * Required to autowire SpringSwaggerConfig
     */
@@ -93,11 +98,27 @@ public class MySwaggerConfig {
 //       };
 //   }
    @Bean
-   public DocumentationConfigurer customImplementation(){
-      return new DocumentationConfigurer(DocumentationType.SWAGGER_2).groupName("plugin").includePatterns(".*calculator.*");
+   ApiInfo apiInfo() {
+      ApiInfo apiInfo = new ApiInfo(
+              "My Apps API Title",
+              "My Apps API Description",
+              "1.0.0",
+              "My Apps API terms of service",
+              "My Apps API Contact Email",
+              "My Apps API Licence Type",
+              "My Apps API License URL"
+      );
+      return apiInfo;
    }
-//
-//   @Bean
-//   ObjectMapper objectMapper() { return new ObjectMapper(); }
+   @Bean
+   public DocumentationConfigurer customImplementation(){
+      return new DocumentationConfigurer(DocumentationType.SWAGGER_2)
+              .groupName("default")
+              .includePatterns(".*calculator.*")
+              .apiInfo(apiInfo());
+   }
+
+   @Bean
+   ObjectMapper objectMapper() { return new ObjectMapper(); }
 
 }
